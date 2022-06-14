@@ -35,8 +35,9 @@ public class RoleRepository {
                 String name = rs.getString(2);
                 roles.add(new Role(id, name));
             }
+            LOG.info("Roles successfully found for user with id: " + userId);
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.warn("Roles unsuccessfully found for user with id: " + userId);
         }
         return roles;
     }

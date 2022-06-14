@@ -2,6 +2,8 @@ package com.zuehlke.securesoftwaredevelopment.repository;
 
 import com.zuehlke.securesoftwaredevelopment.domain.DeliveryDetail;
 import com.zuehlke.securesoftwaredevelopment.domain.ViewableDelivery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
@@ -12,6 +14,7 @@ import java.util.List;
 @Repository
 public class DeliveryRepository {
     private DataSource dataSource;
+    private static final Logger LOG = LoggerFactory.getLogger(CustomerRepository.class);
 
     public DeliveryRepository(DataSource dataSource) {
         this.dataSource = dataSource;
@@ -29,8 +32,10 @@ public class DeliveryRepository {
                 deliveries.add(createDelivery(rs));
             }
 
+            LOG.info("All deliveries successfully pulled from database");
+
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.warn("All deliveries unsuccessfully pulled from database");
         }
         return deliveries;
     }
@@ -45,6 +50,7 @@ public class DeliveryRepository {
         String restaurantName = rs.getString(6);
         String restaurantType = rs.getString(7);
         String address = rs.getString(8);
+        LOG.info("Delivery successfully created");
         return new ViewableDelivery(id, isDone, date, comment, username, address, restaurantName, restaurantType);
     }
 
@@ -56,11 +62,12 @@ public class DeliveryRepository {
              ResultSet rs = statement.executeQuery(sqlQuery)) {
 
             if (rs.next()) {
+                LOG.info("Delivery with id: " + id + " successfully pulled from database");
                 return createDelivery(rs);
             }
-
+            LOG.info("No delivery with id: " + id + " found in database");
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.warn("Delivery unsuccessfully pulled from database", e);
         }
         return null;
     }
@@ -76,9 +83,10 @@ public class DeliveryRepository {
             while (rs.next()) {
                 details.add(createDetail(rs));
             }
+            LOG.info("Delivery details successfully pulled from database");
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.warn("Delivery details unsuccessfully pulled from database",e);
         }
         return details;
     }
@@ -89,7 +97,7 @@ public class DeliveryRepository {
         int amount = rs.getInt(2);
         String foodName = rs.getString(3);
         int price = rs.getInt(4);
-
+        LOG.info("Delivery detail successfully created");
         return new DeliveryDetail(id, amount, foodName, price);
 
     }
@@ -99,6 +107,7 @@ public class DeliveryRepository {
         for(DeliveryDetail detail: details){
             sum+= detail.getPrice() * detail.getAmount();
         }
+        LOG.info("Sum successfully calculated");
         return sum;
     }
 
@@ -118,6 +127,9 @@ public class DeliveryRepository {
             while (rs.next()) {
                 cars.add(createDelivery(rs));
             }
+            LOG.info("Delivery successfully searched");
+        } catch(SQLException e){
+            LOG.warn("Delivery unsuccessfully searched", e);
         }
         return cars;
     }

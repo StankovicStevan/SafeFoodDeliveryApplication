@@ -10,7 +10,7 @@
 
 </head>
 <body>
-<div layout:fragment="content">
+<div layout:fragment="content" sec:authorize="hasAuthority('RESTAURANT_LIST_VIEW')">
     <h1>Restaurants</h1>
     <table class="table">
         <thead>
@@ -32,25 +32,6 @@
         </tr>
         </tbody>
     </table>
-    <h1 sec:authorize="hasAuthority('USERS_LIST_VIEW')">Customers</h1>
-    <table class="table" sec:authorize="hasAuthority('USERS_LIST_VIEW')">
-        <thead>
-        <tr>
-            <th scope="col" >#</th>
-            <th scope="col" >Username</th>
-            <th scope="col" >Details</th>
-        </tr>
-        </thead>
-        <tbody id="customerTableContent">
-        <tr th:each="customer: ${customers}">
-            <td th:text="${customer.id}" ></td>
-            <td th:text="${customer.username}" ></td>
-            <td><a th:href="@{/customer(id=${customer.id})}" >Details</a></td>
-        </tr>
-        </tbody>
-    </table>
-
-
 </div>
 </body>
 </html>

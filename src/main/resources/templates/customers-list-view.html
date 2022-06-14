@@ -11,41 +11,20 @@
 </head>
 <body>
 <div layout:fragment="content">
-    <h1>Restaurants</h1>
-    <table class="table">
-        <thead>
-        <tr>
-            <th scope="col">#</th>
-            <th scope="col">Name</th>
-            <th scope="col">Address</th>
-            <th scope="col">Type</th>
-            <th scope="col" sec:authorize="hasAuthority('RESTAURANT_DETAILS_VIEW')">Change</th>
-        </tr>
-        </thead>
-        <tbody id="restaurantTableContent">
-        <tr th:each="restaurant: ${restaurants}">
-            <td th:text="${restaurant.id}"></td>
-            <td th:text="${restaurant.name}? 'Delivered' : 'Not delivered'"></td>
-            <td th:text="${restaurant.address}"></td>
-            <td th:text="${restaurant.restaurantType}"></td>
-            <td><a th:href="@{/restaurant(id=${restaurant.id})}" sec:authorize="hasAuthority('RESTAURANT_DETAILS_VIEW')">Details</a></td>
-        </tr>
-        </tbody>
-    </table>
     <h1 sec:authorize="hasAuthority('USERS_LIST_VIEW')">Customers</h1>
     <table class="table" sec:authorize="hasAuthority('USERS_LIST_VIEW')">
         <thead>
         <tr>
             <th scope="col" >#</th>
             <th scope="col" >Username</th>
-            <th scope="col" >Details</th>
+            <th scope="col" sec:authorize="hasAuthority('USERS_DETAILS_VIEW')">Details</th>
         </tr>
         </thead>
         <tbody id="customerTableContent">
         <tr th:each="customer: ${customers}">
             <td th:text="${customer.id}" ></td>
             <td th:text="${customer.username}" ></td>
-            <td><a th:href="@{/customer(id=${customer.id})}" >Details</a></td>
+            <td><a th:href="@{/customer(id=${customer.id})}" sec:authorize="hasAuthority('USERS_DETAILS_VIEW')">Details</a></td>
         </tr>
         </tbody>
     </table>

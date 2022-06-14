@@ -1,13 +1,13 @@
 package com.zuehlke.securesoftwaredevelopment.repository;
 
+import com.zuehlke.securesoftwaredevelopment.config.AuditLogger;
 import com.zuehlke.securesoftwaredevelopment.domain.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +16,9 @@ import java.util.List;
 public class OrderRepository {
 
     private DataSource dataSource;
+
+    private static final Logger LOG = LoggerFactory.getLogger(CustomerRepository.class);
+    private static final AuditLogger auditLogger = AuditLogger.getAuditLogger(OrderRepository.class);
 
     public OrderRepository(DataSource dataSource) {
         this.dataSource = dataSource;
@@ -31,9 +34,9 @@ public class OrderRepository {
             while (rs.next()) {
                 menu.add(createFood(rs));
             }
-
+            LOG.info("Menu successfully pulled from database");
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error("Menu unsuccessfully pulled from database", e);
         }
 
         return menu;
@@ -42,18 +45,24 @@ public class OrderRepository {
     private Food createFood(ResultSet rs) throws SQLException {
         int id = rs.getInt(1);
         String name = rs.getString(2);
+        LOG.info("New food with name: " + name + " successfully created");
         return new Food(id, name);
     }
 
     public void insertNewOrder(NewOrder newOrder, int userId) {
         LocalDate date = LocalDate.now();
         String sqlQuery = "INSERT INTO delivery (isDone, userId, restaurantId, addressId, date, comment)" +
-                "values (FALSE, " + userId + ", " + newOrder.getRestaurantId() + ", " + newOrder.getAddress() + "," +
-                "'" + date.getYear() + "-" + date.getMonthValue() + "-" + date.getDayOfMonth() + "', '" + newOrder.getComment() + "')";
-        try {
-            Connection connection = dataSource.getConnection();
-            Statement statement = connection.createStatement();
-            statement.executeUpdate(sqlQuery);
+                "values (FALSE,?,?,?,?,?)";
+        try (Connection connection = dataSource.getConnection();
+             Statement statement = connection.createStatement();
+             PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery);){
+            preparedStatement.setInt(1, userId);
+            preparedStatement.setInt(2,newOrder.getRestaurantId());
+            preparedStatement.setInt(3, newOrder.getAddress());
+            preparedStatement.setString(4, date.getYear() + "-" + date.getMonthValue() + "-" + date.getDayOfMonth());
+            preparedStatement.setString(5, newOrder.getComment());
+
+            preparedStatement.executeUpdate();
 
             sqlQuery = "SELECT MAX(id) FROM delivery";
             ResultSet rs = statement.executeQuery(sqlQuery);
@@ -74,10 +83,11 @@ public class OrderRepository {
                 }
                 System.out.println(sqlQuery);
                 statement.executeUpdate(sqlQuery);
+                auditLogger.audit("New order successfully created");
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.warn("New order unsuccessfully created", e);
         }
 
 
@@ -92,9 +102,9 @@ public class OrderRepository {
             while (rs.next()) {
                 addresses.add(createAddress(rs));
             }
-
+            LOG.info("Addresses successfully pulled from database");
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.warn("Addresses unsuccessfully pulled from database", e);
         }
         return addresses;
     }
@@ -102,6 +112,7 @@ public class OrderRepository {
     private Address createAddress(ResultSet rs) throws SQLException {
         int id = rs.getInt(1);
         String name = rs.getString(2);
+        LOG.info("New address with name: " + name + " successfully created");
         return new Address(id, name);
 
     }

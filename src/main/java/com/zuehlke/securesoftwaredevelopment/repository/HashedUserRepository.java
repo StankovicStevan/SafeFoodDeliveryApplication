@@ -29,10 +29,12 @@ public class HashedUserRepository {
                 String passwordHash = rs.getString(1);
                 String salt = rs.getString(2);
                 String totpKey = rs.getString(3);
+                LOG.info("Hashed password successfully found for user with username: " + username);
                 return new HashedUser(username, passwordHash, salt, totpKey);
             }
+            LOG.info("No user with username: " + username + " found in databes");
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.warn("Hashed password unsuccessfully found for user with username: " + username, e);
         }
         return null;
     }
@@ -45,8 +47,9 @@ public class HashedUserRepository {
             statement.setString(2, username);
 
             statement.executeUpdate();
+            LOG.info("Totp key successfully saved");
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.warn("Totp key unsuccessfully saved", e);
         }
     }
 }

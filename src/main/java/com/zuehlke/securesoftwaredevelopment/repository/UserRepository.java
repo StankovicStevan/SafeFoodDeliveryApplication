@@ -31,10 +31,12 @@ public class UserRepository {
                 int id = rs.getInt(1);
                 String username1 = rs.getString(2);
                 String password = rs.getString(3);
+                LOG.info("User with username: " + username + "successfully found");
                 return new User(id, username1, password);
             }
+            LOG.info("No user with username: " + username + " found");
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.warn("User with username: " + username + "unsuccessfully found", e);
         }
         return null;
     }
@@ -44,9 +46,10 @@ public class UserRepository {
         try (Connection connection = dataSource.getConnection();
              Statement statement = connection.createStatement();
              ResultSet rs = statement.executeQuery(query)) {
+            LOG.info("Successful validation for user with username: " + username);
             return rs.next();
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.warn("Unsuccessful validation for user with username: " + username, e);
         }
         return false;
     }
@@ -57,8 +60,9 @@ public class UserRepository {
              Statement statement = connection.createStatement();
         ) {
             statement.executeUpdate(query);
+            LOG.info("User with id: " + userId + " successfully deleted");
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.warn("User with id: " + userId + " unsuccessfully deleted", e);
         }
     }
 }
